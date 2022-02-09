@@ -1,0 +1,53 @@
+﻿@page "/"
+
+@using Newtonsoft.Json;
+@using CepApp.Models;
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>CepAPP</title>
+    <link href="/css/index.css" rel="stylesheet" />
+    </head>
+    <body>
+        <main class="form-blazor">
+            <div class="inputs-blazor">
+                <input @bind="informacoesCep.Cep" class="form-control" id="input-only-line" placeholder="CEP (Somente Numeros)" />
+                <button @onclick="GetCepInformacoes" type="button" class="btn btn-primary mb-2">Buscar CEP</button>
+
+                <div class="content-recovery">
+                    <input @bind="informacoesCep.Localidade" class="form-control input-data-recovery-mid" readonly placeholder="Localidade..." />
+                    <input @bind="informacoesCep.Uf" class="form-control input-data-recovery-mid input-space" readonly placeholder="Unidade Federativa" />
+                    <input @bind="informacoesCep.Logradouro" class="form-control input-data-recovery" readonly placeholder="Logradouro..." />
+                    <input @bind="informacoesCep.Bairro" class="form-control input-data-recovery" readonly placeholder="Bairro..." />
+                </div>
+            </div>            
+        </main>
+    </body>
+</html>
+
+@code
+{
+    Endereco informacoesCep = new Endereco();
+
+    private async void GetCepInformacoes()
+    {
+        string url = "https://viacep.com.br/ws/" + informacoesCep.Cep + "/json";
+
+        using(var cliente = new HttpClient())
+        {
+            HttpResponseMessage resposta = await cliente.GetAsync(url);
+
+            string json = await resposta.Content.ReadAsStringAsync();
+
+            informacoesCep = JsonConvert.DeserializeObject<Endereco>(json);
+
+            informacoesCep.Cep = informacoesCep.Cep.Replace("-", "");
+        }
+    }
+}
+
+
+
+
